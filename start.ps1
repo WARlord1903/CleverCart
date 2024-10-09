@@ -6,7 +6,7 @@ else{
     Write-Output "Virtual Environment not found, creating and installing dependencies..."
     python -m venv clevercart_env
     .\clevercart_env\Scripts\Activate.ps1
-    python -m pip install flask flask-sqlalchemy flask-login gevent
+    python -m pip install flask flask-sqlalchemy flask-login gevent selenium
 }
 
 python main.py
