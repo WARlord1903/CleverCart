@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user
 from flask_sqlalchemy import SQLAlchemy
+from Web_Scrapper_InstacartV2 import search_items
 import string
 import random
 
@@ -34,12 +35,15 @@ with app.app_context():
 def loader_user(user_id):
     return Users.query.get(user_id)
 
+def get_username():
+    if current_user and current_user.is_authenticated:
+        return current_user.username
+    else:
+        return ""
+
 @app.route('/')
 def homepage():
-    if not current_user is None and current_user.is_authenticated:
-        return render_template('index.html', username=current_user.username)
-    else:
-        return render_template('index.html', username='')
+    return render_template('index.html', username=get_username())
 
 @app.route('/logout')
 @login_required
@@ -48,7 +52,7 @@ def logout():
     if session.get('was_once_logged_in'):
         del session['was_once_logged_in']
     flash('You have been logged out. Feel free to close the browser.')
-    return redirect('/')
+    return redirect(url_for('homepage', username=get_username()))
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
@@ -60,8 +64,8 @@ def register():
 
         db.session.commit()
 
-        return redirect(url_for("login"))
-    return render_template("register.html")
+        return redirect(url_for("login", username=get_username()))
+    return render_template("register.html", username=get_username())
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
@@ -70,7 +74,16 @@ def login():
         user = Users.query.filter_by(username=request.form.get("username")).first()
         if user and user.password == request.form.get("password"):
             login_user(user)
-            return redirect('/')
+            return redirect(url_for('homepage', username=get_username()))
         else:
-            return render_template("login.html", failed=True)
-    return render_template("login.html", failed=False)
+            return render_template("login.html", failed=True, username=get_username())
+    return render_template("login.html", failed=False, username=get_username())
+
+@app.route('/search', methods=['POST'])
+@login_required
+def search():
+    if request.method == "POST":
+        ingredient = request.form.get("ingredient-search")
+        items = search_items(ingredient)
+        return render_template('search.html', search_term = ingredient, ingredient_list=items, username=get_username())
+    return redirect(url_for('homepage', username=get_username()))

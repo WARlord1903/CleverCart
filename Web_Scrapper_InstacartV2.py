@@ -63,9 +63,9 @@ def search_items(item):
     # Return the list of ingredients and prices
     return items_with_prices
 
-# Example usage
-lays_list = search_items("avocado")
+# # Example usage
+# lays_list = search_items("avocado")
 
-# Print the returned items with prices
-for item_name, item_price in lays_list:
-    print(f"Item: {item_name}, Price: {item_price}")
+# # Print the returned items with prices
+# for item_name, item_price in lays_list:
+#     print(f"Item: {item_name}, Price: {item_price}")
