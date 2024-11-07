@@ -90,7 +90,7 @@ def search():
     items = search_items(ingredient) if ingredient else []
     return render_template('home.html', search_term=ingredient, ingredient_list=items, username=get_username())
 
-openai.api_key = "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"
+openai.api_key = "insert api key here"
 
 @app.route('/home')
 @login_required
@@ -102,7 +102,7 @@ def home():
 def chat_with_openai():
     user_message = request.json.get("message")
     if user_message:
-        client = openai.Client(api_key="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")
+        client = openai.Client(api_key="insert api key here")
         
         # Define behavior instructions for the assistant in the system message
         response = client.chat.completions.create(
@@ -132,7 +132,7 @@ def recipe():
     if request.method == 'POST':
         recipe_name = request.form.get("recipe_name")
 
-        client = openai.Client(api_key="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")
+        client = openai.Client(api_key="insert api key here")
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
