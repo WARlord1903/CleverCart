@@ -1,0 +1,10 @@
+{% extends 'nav.html' %}
+
+{% block content %}
+    <h3>Results for {{search_term}}:</h3>
+    <ul>
+        {% for ingredient in ingredient_list %}
+            <li>{{ingredient[0]}}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

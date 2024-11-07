@@ -1,0 +1,13 @@
+{% extends 'nav.html' %}
+
+{% block content %}
+    <h1 class="display-4 text-center mb-5">Register an account!</h1>
+    <form action="#" method="post">
+        <div class="d-flex flex-column align-items-center justify-content-center">
+            <input type="text" name="username" class="form-control w-25 mt-1" placeholder="Username">
+            <input type="password" name="password" class="form-control w-25 mt-1" placeholder="Password">
+            <button type="submit" class="btn btn-primary mt-2 w-25">Login!</button>
+            <p>Already have an account? Log in <a href="/login">here</a>!</p>
+      </div>
+    </form>
+{% endblock %}

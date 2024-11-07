@@ -1,0 +1,48 @@
+{% extends 'nav.html' %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="text-center">
+        <h1 class="display-4 mb-4">Welcome to CleverCart!</h1>
+        <p class="lead mb-4">Your go-to app for discovering and chatting about ingredients, recipes, and more.</p>
+
+        <div class="d-flex justify-content-center mb-4">
+            <a href="/login" class="btn btn-primary btn-lg me-3">Login</a>
+            <a href="/register" class="btn btn-outline-primary btn-lg">Register</a>
+        </div>
+
+        <hr class="my-5">
+
+        <!-- Features Section -->
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Chat with Smart Chef</h5>
+                        <p class="card-text">Ask for recipes, ingredient substitutions, and cooking tips from Smart Chef.</p>
+                        <img src="https://via.placeholder.com/150" class="img-fluid mb-2" alt="Chat with AI">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Discover Ingredients</h5>
+                        <p class="card-text">Search for ingredients and get suggestions tailored to your recipes.</p>
+                        <img src="https://via.placeholder.com/150" class="img-fluid mb-2" alt="Ingredient Search">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Personalized Recommendations</h5>
+                        <p class="card-text">Explore recipe ideas and ingredient lists based on your preferences.</p>
+                        <img src="https://via.placeholder.com/150" class="img-fluid mb-2" alt="Recommendations">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
