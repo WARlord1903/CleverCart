@@ -82,4 +82,4 @@ def search_items(keyword):
         print(f"No items found for '{keyword}'.")
 
 # Example usage with a keyword
-search_items("banana")
+#search_items("banana")
