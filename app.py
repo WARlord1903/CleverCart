@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user
 from flask_sqlalchemy import SQLAlchemy
-from Web_Scrapper_InstacartV2 import search_items
+from user_agents import parse
+from Web_Scraper_InstacartV3 import search_items
 import string
 import random
 import openai
@@ -23,6 +24,8 @@ class Users(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(250), unique=True, nullable=False)
     password = db.Column(db.String(250), nullable=False)
+    api_key = db.Column(db.String(256), nullable=True)
+    preferred_store = db.Column(db.Integer, nullable=False)
 
 db.init_app(app)
 
@@ -39,9 +42,23 @@ def get_username():
     else:
         return ""
 
+browser = None
+browser_version = None
+
 @app.route('/')
 def homepage():
-    return render_template('index.html', username=get_username())
+    global browser
+    global browser_version
+
+    user_agent = parse(request.headers.get('User-Agent'))
+    browser = user_agent.browser.family
+    print(browser)
+    version = user_agent.browser.version_string
+
+    if current_user.is_authenticated:
+        return render_template('home.html', username=get_username())
+    else:
+        return render_template('index.html', username=get_username())
 
 @app.route('/logout')
 @login_required
@@ -56,7 +73,9 @@ def logout():
 def register():
     if request.method == "POST":
         user = Users(username=request.form.get("username"),
-                     password=request.form.get("password"))
+                     password=request.form.get("password"),
+                     api_key='',
+                     preferred_store=0)
         db.session.add(user)
         db.session.commit()
         return redirect(url_for("login", username=get_username()))
@@ -74,6 +93,47 @@ def login():
             return render_template("login.html", failed=True, username=get_username())
     return render_template("login.html", failed=False, username=get_username())
 
+@app.route('/account')
+@login_required
+def account_settings():
+    if current_user.is_authenticated:
+        return render_template("settings.html", username=get_username(), api_key=current_user.api_key, store=current_user.preferred_store)
+
+@app.route('/account/password-update', methods=["POST"])
+@login_required
+def update_password():
+    if current_user.is_authenticated:
+        if request.form.get('password') == request.form.get('password-verification'):
+            db.session.query(Users).filter(Users.id == current_user.get_id()).update({'password': request.form.get('password')})
+            db.session.commit()
+        return render_template("settings.html", username=get_username(), api_key=current_user.api_key, store=current_user.preferred_store)
+
+@app.route('/account/key-update', methods=["POST"])
+@login_required
+def update_key():
+    if current_user.is_authenticated:
+        db.session.query(Users).filter(Users.id == current_user.get_id()).update({'api_key': request.form.get('api-key')})
+        db.session.commit()
+        return render_template("settings.html", username=get_username(), api_key=current_user.api_key, store=current_user.preferred_store)
+
+@app.route('/account/update-store', methods=['POST'])
+@login_required
+def update_store():
+    if current_user.is_authenticated:
+        db.session.query(Users).filter(Users.id == current_user.get_id()).update({'preferred_store': int(request.form.get('store-options'))})
+        db.session.commit()
+        return render_template("settings.html", username=get_username(), api_key=current_user.api_key, store=current_user.preferred_store)
+
+
+@app.route('/account/delete', methods=['POST'])
+@login_required
+def delete_account():
+    id = current_user.get_id()
+    logout_user()
+    db.session.query(Users).filter(id == current_user.get_id()).delete()
+    db.session.commit()
+    return redirect(url_for('home'))
+
 @app.route('/')
 def welcome_page():
     # Check if the user is already authenticated
@@ -86,15 +146,17 @@ def welcome_page():
 @app.route('/search', methods=['POST'])
 @login_required
 def search():
+    global browser
+    global browser_version
+    
     ingredient = request.form.get("ingredient-search")
-    items = search_items(ingredient) if ingredient else []
+    items = search_items(ingredient, current_user.preferred_store, browser, browser_version) if ingredient else []
     return render_template('home.html', search_term=ingredient, ingredient_list=items, username=get_username())
-
-openai.api_key = "insert api key here"
 
 @app.route('/home')
 @login_required
 def home():
+    openai.api_key = current_user.api_key
     return render_template('home.html', username=get_username())
 
 @app.route('/chat', methods=['POST'])
@@ -102,7 +164,7 @@ def home():
 def chat_with_openai():
     user_message = request.json.get("message")
     if user_message:
-        client = openai.Client(api_key="insert api key here")
+        client = openai.Client(api_key=current_user.api_key)
         
         # Define behavior instructions for the assistant in the system message
         response = client.chat.completions.create(
@@ -129,10 +191,13 @@ def chat_with_openai():
 @app.route('/recipe', methods=['GET', 'POST'])
 @login_required
 def recipe():
+    global browser
+    global browser_version
+    
     if request.method == 'POST':
         recipe_name = request.form.get("recipe_name")
 
-        client = openai.Client(api_key="insert api key here")
+        client = openai.Client(api_key=current_user.api_key)
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -149,7 +214,7 @@ def recipe():
 
         ingredient_results = []
         for ingredient in ingredients:
-            result = search_items(ingredient)
+            result = search_items(ingredient, current_user.preferred_store, browser, browser_version)
             ingredient_results.append({"ingredient": ingredient, "results": result})
         
         return render_template("recipe_results.html", ingredient_results=ingredient_results, username=get_username())

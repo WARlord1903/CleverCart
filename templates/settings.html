@@ -1,0 +1,86 @@
+{% extends 'nav.html' %}
+
+{% block content %}
+
+<div class="container my-4">
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="card-body">
+                    <h3 class="card-title">Select Preferred Store</h3>
+                    <form action="/account/update-store" method="post">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="store-options" id="publix" value="0">
+                            <label class="form-check-label" for="publix">Publix</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="store-options" id="food-city" value="1">
+                            <label class="form-check-label" for="food-city">Food City</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="store-options" id="kroger" value="2">
+                            <label class="form-check-label" for="kroger">Kroger</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="store-options" id="sams-club" value="3">
+                            <label class="form-check-label" for="sams-club">Sam's Club</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="store-options" id="food-lion" value="4">
+                            <label class="form-check-label" for="food-lion">Food Lion</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="store-options" id="aldi" value="5">
+                            <label class="form-check-label" for="aldi">Aldi's</label>
+                        </div>
+                        <button class="btn btn-success" type="submit">Save</button>
+                    </form>
+                </div>
+                <hr>
+                <div class="card-body">
+                    <h3 class="card-title">Update Password</h3>
+                    <div class="input-group">
+                        <form action="/account/password-update" method="post">
+                            <input class="form-control" name="password" type="password" placeholder="New Password">
+                            <input class="form-control" name="password-verification" type="password" placeholder="Re-Enter New Password">
+                            <button class="btn btn-success" type="submit">Update</button>
+                        </form>
+                    </div>
+                    <hr>
+                    <h3>Update OpenAI API Key</h3>
+                    <form action="/account/key-update" method="post">
+                        <input class="form-control" id="api-key" name="api-key" type="text">
+                        <button class="btn btn-success" type="submit">Update</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelector('#api-key').value = "{{api_key}}";
+
+    switch({{store}}){
+        case 0:
+            document.querySelector("#publix").checked = true;
+            break;
+        case 1:
+            document.querySelector("#food-city").checked = true;
+            break;
+        case 2:
+            document.querySelector("#kroger").checked = true;
+            break;
+        case 3:
+            document.querySelector("#sams-club").checked = true;
+            break;
+        case 4:
+            document.querySelector("#food-lion").checked = true;
+            break;
+        case 5:
+            document.querySelector("#aldi").checked = true;
+            break;
+    }
+</script>
+
+{% endblock %}
