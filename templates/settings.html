@@ -52,6 +52,27 @@
                         <input class="form-control" id="api-key" name="api-key" type="text">
                         <button class="btn btn-success" type="submit">Update</button>
                     </form>
+                    <hr>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete Account</button>
+                    <div class="modal fade" id="delete-modal" tabindex="-1" aria-labelledby="delete-modal-label" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="delete-modal-label">Delete Account?</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Deleting your account will delete all user information, including your preferred store, stored API key, and saved recipes. Are you sure you want to delete your account?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                                    <form action="/account/delete" method="post">
+                                        <button type="submit" class="btn btn-danger">Yes</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>                      
                 </div>
             </div>
         </div>

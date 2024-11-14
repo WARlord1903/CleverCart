@@ -130,9 +130,9 @@ def update_store():
 def delete_account():
     id = current_user.get_id()
     logout_user()
-    db.session.query(Users).filter(id == current_user.get_id()).delete()
+    db.session.query(Users).filter(Users.id == id).delete()
     db.session.commit()
-    return redirect(url_for('home'))
+    return redirect('/')
 
 @app.route('/')
 def welcome_page():
