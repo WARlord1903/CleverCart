@@ -11,33 +11,10 @@ def search_items(keyword, store, browser, browser_version):
     # List of stores to search
     stores = ["publix", "food-city", "kroger", "sams-club", "food-lion", "aldi"]
 
-    driver = None
-
-    # Initialize Chrome WebDriver with options
-    if browser == 'Firefox':
-        firefox_options = FirefoxOptions()
-        firefox_options.add_argument("--disable-gpu")
-        firefox_options.add_argument("--headless")
-        driver = webdriver.Firefox(options=firefox_options)
-    elif browser == 'Edge':
-        edge_options = EdgeOptions()
-        edge_options.add_argument("--disable-gpu")
-        edge_options.add_argument("--headless")
-        driver = webdriver.Edge(options=edge_options)
-    elif browser == 'Safari':
-        safari_options = SafariOptions()
-        safari_options.add_argument("--disable-gpu")
-        # headless not supported by Safari
-        driver = webdriver.Safari(options=safari_options)
-    # not supporting Internet Explorer
-    else:
-        chrome_options = ChromeOptions()
-        chrome_options.add_argument("--disable-gpu")
-        if int(browser_version[:3]) >= 109:
-            chrome_options.add_argument("--headless=new")
-        else:
-            chrome_options.add_argument("--headless")
-        driver = webdriver.Chrome(options=chrome_options)
+    firefox_options = FirefoxOptions()
+    firefox_options.add_argument("--disable-gpu")
+    firefox_options.add_argument("--headless")
+    driver = webdriver.Firefox(options=firefox_options)
 
     all_items = []
 
