@@ -31,7 +31,6 @@
             const ingredient_text = ingredient.innerText;
             const list = btn.parentNode.children[2];
             list.innerHTML = "";
-            console.log(btn.name);
 
             const response = await fetch('/recipe/search/', {
                 method: 'POST',
@@ -41,9 +40,9 @@
 
             const data = await response.json();
 
-            console.log(data)
-
             if(data){
+                if(data.length == 0)
+                    list.innerHTML += "<li>No results found!</li>";
                 for(i of data){
                     if(i[2] == 1)
                         list.innerHTML += `<li>${i[0]} (${i[1]} at Food City)</li>`;
