@@ -1,0 +1,21 @@
+{% extends 'nav.html' %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h3 class="card-title">Chat with Smart Chef</h3>
+                    <div id="chat-box" style="border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; margin-bottom: 10px; background-color: #f8f9fa;">
+                        <p>Enter a recipe you would like to find ingredients for!</p>
+                    </div>
+                    <form action="/recipe", method="post">
+                        <input type="text" name="recipe_name" class="form-control" placeholder="Type your recipe..." aria-label="Recipe">
+                        <button class="btn btn-primary" type="submit">Send</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -45,15 +45,20 @@ def get_username():
 browser = None
 browser_version = None
 
-@app.route('/')
-def homepage():
+def update_browser():
     global browser
     global browser_version
 
     user_agent = parse(request.headers.get('User-Agent'))
     browser = user_agent.browser.family
-    print(browser)
-    version = user_agent.browser.version_string
+    browser_version = user_agent.browser.version_string
+
+@app.route('/')
+def homepage():
+    update_browser()
+
+    global browser
+    global browser_version
 
     if current_user.is_authenticated:
         return render_template('home.html', username=get_username())
@@ -146,6 +151,7 @@ def welcome_page():
 @app.route('/search', methods=['POST'])
 @login_required
 def search():
+    update_browser()
     global browser
     global browser_version
     
@@ -205,18 +211,49 @@ def recipe():
                     "role": "system",
                     "content": "This GPT, Smart Chef, provides thoughtful recipe ideas and highlights ultra-processed ingredients."
                 },
-                {"role": "user", "content": f"List the ingredients for {recipe_name}"}
+                {"role": "user", "content": f"List the ingredients for {recipe_name} without any greetings, with each ingredient on a new line. If an ingredient contains more than one product (e.g. salt and pepper), split them up."},
             ]
         )
 
-        ingredients_text = response['choices'][0]['message']['content']
-        ingredients = ingredients_text.splitlines()
+        ingredients_text = response.to_dict()['choices'][0]['message']['content']
+        if ingredients_text[:2] == '- ':
+            ingredients = [ing[2:] for ing in ingredients_text.splitlines()]
+        else:
+            ingredients = ingredients_text.splitlines()
+            
+        ingredient_str = ''
+        for i in ingredients:
+            ingredient_str += i + ', '
+        i = i[:-2]
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "user", "content": f"List the listed ingredients without any greetings, amounts, or other kinds of description (just the names of the ingredients), with each ingredient on a separate line: [{ingredient_str}]. Ensure that each item in the list in the prompt has exactly one corresponding item in the response. (The given list and the resulting list should have the same length.)"},
+            ]
+        )
 
-        ingredient_results = []
-        for ingredient in ingredients:
-            result = search_items(ingredient, current_user.preferred_store, browser, browser_version)
-            ingredient_results.append({"ingredient": ingredient, "results": result})
+        raw_ingredients_text = response.to_dict()['choices'][0]['message']['content']
+        if raw_ingredients_text[:2] == '- ':
+            raw_ingredients = [ing[2:] for ing in raw_ingredients_text.splitlines()]
+        else:
+            raw_ingredients = raw_ingredients_text.splitlines()
+
+        # ingredient_results = []
+        # for ingredient in ingredients:
+        #     result = search_items(ingredient, current_user.preferred_store, browser, browser_version)
+        #     ingredient_results.append({"ingredient": ingredient, "results": result})
         
-        return render_template("recipe_results.html", ingredient_results=ingredient_results, username=get_username())
+        return render_template("recipe_results.html", recipe=recipe_name, ingredients=ingredients, ingredient_names=raw_ingredients, username=get_username())
     
     return render_template("recipe_form.html", username=get_username())
+
+@app.route('/recipe/search/', methods=['POST'])
+@login_required
+def recipe_ingredient_search():
+    update_browser()
+    global browser
+    global browser_version
+    ingredient = request.json.get('ingredient')
+    items = search_items(ingredient, current_user.preferred_store, browser, browser_version)
+    items = [list(i) for i in items]
+    return jsonify(items)

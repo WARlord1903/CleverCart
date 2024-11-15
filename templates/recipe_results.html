@@ -1,0 +1,66 @@
+{% extends 'nav.html' %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="text-muted">Ingredients for "{{recipe}}":</h5>
+                    <ul class="list-group">
+                        {% for i in range(ingredients | length) %}                        
+                            <li>
+                                <div>
+                                    <h5><strong>{{ingredients[i]}}</strong></h5>
+                                    <button class="btn btn-primary" name="{{ingredient_names[i]}}" onclick="await_search(this)">Search</button>
+                                    <ul></ul>
+                                    <p hidden>Searching...</p>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function await_search(btn) {
+            btn.parentNode.children[3].hidden = false;
+            const ingredient = btn.parentNode.children[0];
+            const ingredient_text = ingredient.innerText;
+            const list = btn.parentNode.children[2];
+            list.innerHTML = "";
+            console.log(btn.name);
+
+            const response = await fetch('/recipe/search/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ingredient: btn.name})
+            });
+
+            const data = await response.json();
+
+            console.log(data)
+
+            if(data){
+                for(i of data){
+                    if(i[2] == 1)
+                        list.innerHTML += `<li>${i[0]} (${i[1]} at Food City)</li>`;
+                    else if(i[2] == 2)
+                        list.innerHTML += `<li>${i[0]} (${i[1]} at Kroger)</li>`;
+                    else if(i[2] == 3)
+                        list.innerHTML += `<li>${i[0]} (${i[1]} at Sam's Club)</li>`;
+                    else if(i[2] == 4)
+                        list.innerHTML += `<li>${i[0]} (${i[1]} at Food Lion)</li>`;
+                    else if(i[2] == 5)
+                        list.innerHTML += `<li>${i[0]} (${i[1]} at Aldi's)</li>`;
+                    else
+                        list.innerHTML += `<li>${i[0]} (${i[1]} at Publix)</li>`;
+                }
+            }
+            btn.parentNode.children[3].hidden = true;
+        }
+    </script>
+
+{% endblock %}
