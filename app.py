@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user
 from flask_sqlalchemy import SQLAlchemy
-from user_agents import parse
 from Web_Scraper_InstacartV3 import search_items
 import string
 import random
@@ -41,25 +40,9 @@ def get_username():
         return current_user.username
     else:
         return ""
-
-browser = None
-browser_version = None
-
-def update_browser():
-    global browser
-    global browser_version
-
-    user_agent = parse(request.headers.get('User-Agent'))
-    browser = user_agent.browser.family
-    browser_version = user_agent.browser.version_string
-
+    
 @app.route('/')
 def homepage():
-    update_browser()
-
-    global browser
-    global browser_version
-
     if current_user.is_authenticated:
         return render_template('home.html', username=get_username())
     else:
@@ -151,12 +134,9 @@ def welcome_page():
 @app.route('/search', methods=['POST'])
 @login_required
 def search():
-    update_browser()
-    global browser
-    global browser_version
     
     ingredient = request.form.get("ingredient-search")
-    items = search_items(ingredient, current_user.preferred_store, browser, browser_version) if ingredient else []
+    items = search_items(ingredient, current_user.preferred_store) if ingredient else []
     return render_template('home.html', search_term=ingredient, ingredient_list=items, username=get_username())
 
 @app.route('/home')
@@ -197,8 +177,6 @@ def chat_with_openai():
 @app.route('/recipe', methods=['GET', 'POST'])
 @login_required
 def recipe():
-    global browser
-    global browser_version
     
     if request.method == 'POST':
         recipe_name = request.form.get("recipe_name")
@@ -228,7 +206,7 @@ def recipe():
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "user", "content": f"List the listed ingredients without any greetings, amounts, or other kinds of description (just the names of the ingredients), with each ingredient on a separate line: [{ingredient_str}]. Ensure that each item in the list in the prompt has exactly one corresponding item in the response. (The given list and the resulting list should have the same length.)"},
+                {"role": "user", "content": f"List the listed ingredients without any greetings, amounts, or other kinds of description (just the names of the ingredients), with each ingredient on a separate line: [{ingredient_str}]. Ensure that each ingredient name is as simple as possible. Ensure that each item in the list in the prompt has exactly one corresponding item in the response (The given list and the resulting list should have the same length)."},
             ]
         )
 
@@ -237,11 +215,6 @@ def recipe():
             raw_ingredients = [ing[2:] for ing in raw_ingredients_text.splitlines()]
         else:
             raw_ingredients = raw_ingredients_text.splitlines()
-
-        # ingredient_results = []
-        # for ingredient in ingredients:
-        #     result = search_items(ingredient, current_user.preferred_store, browser, browser_version)
-        #     ingredient_results.append({"ingredient": ingredient, "results": result})
         
         return render_template("recipe_results.html", recipe=recipe_name, ingredients=ingredients, ingredient_names=raw_ingredients, username=get_username())
     
@@ -250,10 +223,7 @@ def recipe():
 @app.route('/recipe/search/', methods=['POST'])
 @login_required
 def recipe_ingredient_search():
-    update_browser()
-    global browser
-    global browser_version
     ingredient = request.json.get('ingredient')
-    items = search_items(ingredient, current_user.preferred_store, browser, browser_version)
+    items = search_items(ingredient, current_user.preferred_store)
     items = [list(i) for i in items]
     return jsonify(items)

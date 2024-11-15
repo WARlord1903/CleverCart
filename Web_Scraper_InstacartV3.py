@@ -7,7 +7,7 @@ from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.safari.options import Options as SafariOptions
 from time import sleep
 
-def search_items(keyword, store, browser, browser_version):
+def search_items(keyword, store):
     # List of stores to search
     stores = ["publix", "food-city", "kroger", "sams-club", "food-lion", "aldi"]
 
