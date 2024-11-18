@@ -35,7 +35,7 @@
                     <h3 class="card-title">Search for Ingredients</h3>
                     <form class="d-flex mb-4" role="search" action="/search" method="POST">
                         <input class="form-control me-2" type="search" name="ingredient-search" id="ingredient-search" placeholder="Search for Ingredients!" aria-label="Search">
-                        <button class="btn btn-success" type="submit">Search</button>
+                        <button class="btn btn-success" id="search-btn" type="submit">Search <span class="spinner-border spinner-border-sm" aria-hidden="true" id="searching-spinner" hidden></span></button>
                     </form>
 
                     <!-- Display Search Results -->
@@ -54,6 +54,10 @@
 </div>
 
 <script>
+    document.querySelector("#search-btn").addEventListener('click', () => {
+        document.querySelector("#searching-spinner").hidden = false;
+    })
+
     function sendWelcomeMessage() {
         const welcomeMessage = `<p><strong>Smart Chef:</strong> Welcome! I'm here to help with recipes, ingredient suggestions, and more. What would you like to cook today?</p>`;
         document.getElementById('chat-box').innerHTML += welcomeMessage;
