@@ -189,11 +189,15 @@ def recipe():
                     "role": "system",
                     "content": "This GPT, Smart Chef, provides thoughtful recipe ideas and highlights ultra-processed ingredients."
                 },
-                {"role": "user", "content": f"List the ingredients for {recipe_name} without any greetings, with each ingredient on a new line. If an ingredient contains more than one product (e.g. salt and pepper), split them up."},
+                {"role": "user", "content": f"If {recipe_name} is not edible, output \"None\". Otherwise, list the ingredients for {recipe_name} without any greetings, with each ingredient on a new line. If an ingredient contains more than one product (e.g. salt and pepper), split them up."},
             ]
         )
 
         ingredients_text = response.to_dict()['choices'][0]['message']['content']
+
+        if ingredients_text == "None":
+            return render_template("recipe_form.html", failed=True, username=get_username())
+
         if ingredients_text[:2] == '- ':
             ingredients = [ing[2:] for ing in ingredients_text.splitlines()]
         else:
@@ -218,7 +222,7 @@ def recipe():
         
         return render_template("recipe_results.html", recipe=recipe_name, ingredients=ingredients, ingredient_names=raw_ingredients, username=get_username())
     
-    return render_template("recipe_form.html", username=get_username())
+    return render_template("recipe_form.html", failed=False, username=get_username())
 
 @app.route('/recipe/search/', methods=['POST'])
 @login_required

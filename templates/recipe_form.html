@@ -5,6 +5,9 @@
         <div class="col-md-8 mx-auto">
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
+                    {% if failed == True %}
+                    <p class="text-center bg-danger text-white">Please enter a valid recipe!</p>
+                    {% endif %}
                     <h3 class="card-title">Chat with Smart Chef</h3>
                     <div id="chat-box" style="border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; margin-bottom: 10px; background-color: #f8f9fa;">
                         <p>Enter a recipe you would like to find ingredients for!</p>
