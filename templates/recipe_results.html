@@ -2,64 +2,107 @@
 
 {% block content %}
 
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="text-muted">Ingredients for "{{recipe}}":</h5>
-                    <ul class="list-group">
-                        {% for i in range(ingredients | length) %}                        
-                            <li>
-                                <div>
-                                    <h5><strong>{{ingredients[i]}}</strong></h5>
-                                    <button class="btn btn-primary" name="{{ingredient_names[i]}}" onclick="await_search(this)">Search</button>
-                                    <ul></ul>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="text-muted">Ingredients for "{{recipe}}":</h5>
+                <ul class="list-group">
+                    {% for i in range(ingredients | length) %}                        
+                        <li>
+                            <div>
+                                <h5><strong>{{ingredients[i]}}</strong></h5>
+                                <button class="btn btn-primary" name="{{ingredient_names[i]}}" onclick="await_search(this)">Search</button>
+                                <ul></ul>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <button class="btn btn-primary" onclick="generate_steps(this)">Generate Steps!</button>
+                <div hidden>
+                    <hr>
+                    <h5>Recipe for "{{recipe}}"</h5>
+                    <ol></ol>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        async function await_search(btn) {
-            btn.innerHTML += ' <span class="spinner-border spinner-border-sm" aria-hidden="true" id="searching-spinner"></span>'
-            const ingredient = btn.parentNode.children[0];
-            const ingredient_text = ingredient.innerText;
-            const list = btn.parentNode.children[2];
-            list.innerHTML = "";
+<script>
+    async function await_search(btn) {
+        if(btn.innerHTML == "Search")
+            btn.innerHTML += ' <span class="spinner-border spinner-border-sm" aria-hidden="true" id="searching-spinner"></span>';
+        const ingredient = btn.parentNode.children[0];
+        const ingredient_text = ingredient.innerText;
+        const list = btn.parentNode.children[2];
+        list.innerHTML = "";
 
 
-            const response = await fetch('/recipe/search/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ingredient: btn.name})
-            });
+        const response = await fetch('/recipe/search/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ingredient: btn.name})
+        });
 
-            const data = await response.json();
+        const data = await response.json();
 
-            if(data){
-                if(data.length == 0)
-                    list.innerHTML += "<li>No results found!</li>";
-                for(i of data){
-                    if(i[2] == 1)
-                        list.innerHTML += `<li>${i[0]} (${i[1]} at Food City)</li>`;
-                    else if(i[2] == 2)
-                        list.innerHTML += `<li>${i[0]} (${i[1]} at Kroger)</li>`;
-                    else if(i[2] == 3)
-                        list.innerHTML += `<li>${i[0]} (${i[1]} at Sam's Club)</li>`;
-                    else if(i[2] == 4)
-                        list.innerHTML += `<li>${i[0]} (${i[1]} at Food Lion)</li>`;
-                    else if(i[2] == 5)
-                        list.innerHTML += `<li>${i[0]} (${i[1]} at Aldi)</li>`;
-                    else
-                        list.innerHTML += `<li>${i[0]} (${i[1]} at Publix)</li>`;
-                }
+        if(data){
+            if(data.length == 0)
+                list.innerHTML += "<li>No results found!</li>";
+            for(i of data){
+                if(i[2] == 1)
+                    list.innerHTML += `<li>${i[0]} (${i[1]} at Food City)</li>`;
+                else if(i[2] == 2)
+                    list.innerHTML += `<li>${i[0]} (${i[1]} at Kroger)</li>`;
+                else if(i[2] == 3)
+                    list.innerHTML += `<li>${i[0]} (${i[1]} at Sam's Club)</li>`;
+                else if(i[2] == 4)
+                    list.innerHTML += `<li>${i[0]} (${i[1]} at Food Lion)</li>`;
+                else if(i[2] == 5)
+                    list.innerHTML += `<li>${i[0]} (${i[1]} at Aldi)</li>`;
+                else
+                    list.innerHTML += `<li>${i[0]} (${i[1]} at Publix)</li>`;
             }
-            btn.innerHTML = "Search";
         }
-    </script>
+        btn.innerHTML = "Search";
+    }
+
+    async function generate_steps(btn) {
+
+        if(btn.innerHTML == "Generate Steps!")
+            btn.innerHTML += ' <span class="spinner-border spinner-border-sm" aria-hidden="true" id="searching-spinner"></span>';
+        const div = btn.parentNode.children[1];
+        const list = div.children[2];
+        list.innerHTML = "";
+
+        const response = await fetch('/recipe/steps/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ingredients: {{ingredients | tojson}},
+                recipe: '{{recipe}}'
+            })
+        });
+
+        const data = await response.json();
+
+        if(data)
+            for(s of data)
+                list.innerHTML += `<li>${s}</li>`;
+
+        btn.innerHTML = "Generate Steps!";
+        div.hidden = false;
+    }
+</script>
 
 {% endblock %}

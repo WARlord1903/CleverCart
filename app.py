@@ -231,3 +231,46 @@ def recipe_ingredient_search():
     items = search_items(ingredient, current_user.preferred_store)
     items = [list(i) for i in items]
     return jsonify(items)
+
+@app.route('/recipe/steps/', methods=['POST'])
+@login_required
+def recipe_generate_steps():
+    ingredients = request.json.get('ingredients')
+    recipe = request.json.get('recipe')
+    
+    ingredient_str = ""
+    for i in ingredients:
+        ingredient_str += i + ", "
+    ingredient_str = ingredient_str[:-2]
+
+    client = openai.Client(api_key=current_user.api_key)
+        
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "system",
+                "content": "This GPT is given the name of recipe and a list of ingredients, and provides step-by step instructions on how to make the recipe in the form of an ordered list."
+            },
+            {
+                "role": "user",
+                "content": f"How can I make {recipe} using the following ingredients: [{ingredient_str}]?"
+            }
+        ]
+    )
+    
+    # Convert response to dictionary and extract bot's reply
+    response_dict = response.to_dict()
+    step_list = response_dict['choices'][0]['message']['content'].splitlines()
+    steps = []
+
+    for step in step_list:
+        if step.strip() != "":
+            new_step = ""
+            split_step = step.split('. ')
+            for i in range(1, len(split_step)):
+                   new_step += split_step[i] + '. '
+            steps.append(new_step[:-2])
+    steps = list(filter(None, steps))
+    print(steps)
+    return jsonify(steps)
