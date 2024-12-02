@@ -12,7 +12,8 @@
                         <li>
                             <div>
                                 <h5><strong>{{ingredients[i]}}</strong></h5>
-                                <button class="btn btn-primary" name="{{ingredient_names[i]}}" onclick="await_search(this)">Search</button>
+                                <button class="btn btn-primary" name="{{ingredient_names[i]}}" onclick="await_search(this, false)">Search</button>
+                                <button class="btn btn-primary" name="{{ingredient_names[i]}}" onclick="await_search(this, true)">Update</button>
                                 <ul></ul>
                             </div>
                         </li>
@@ -39,16 +40,16 @@
 </div>
 
 <script>
-    async function await_search(btn) {
-        if(btn.innerHTML == "Search")
+    async function await_search(btn, update) {
+        if(btn.innerHTML == (update ? "Update" : "Search"))
             btn.innerHTML += ' <span class="spinner-border spinner-border-sm" aria-hidden="true" id="searching-spinner"></span>';
         const ingredient = btn.parentNode.children[0];
         const ingredient_text = ingredient.innerText;
-        const list = btn.parentNode.children[2];
+        const list = btn.parentNode.children[3];
         list.innerHTML = "";
 
 
-        const response = await fetch('/recipe/search/', {
+        const response = await fetch((update ? '/recipe/update/' : '/recipe/search/'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ingredient: btn.name})
@@ -74,7 +75,7 @@
                     list.innerHTML += `<li>${i[0]} (${i[1]} at Publix)</li>`;
             }
         }
-        btn.innerHTML = "Search";
+        btn.innerHTML = (update ? "Update" : "Search");
     }
 
     async function generate_steps(btn) {

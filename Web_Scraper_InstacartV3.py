@@ -5,6 +5,7 @@ from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.safari.options import Options as SafariOptions
+from databaseupdated import cache_item
 from time import sleep
 
 def search_items(keyword, store):
@@ -74,7 +75,11 @@ def search_items(keyword, store):
     except StaleElementReferenceException:
         print("Stale elements detected. Retrying...")
 
+
     driver.quit()
+
+    for item in all_items:
+        cache_item(keyword, item[0], item[1], stores[store])
 
     # Print results directly
     # if all_items:

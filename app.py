@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from Web_Scraper_InstacartV3 import search_items
+from databasefinal import fetch_items
 import string
 import random
 import openai
@@ -228,6 +229,18 @@ def recipe():
 @login_required
 def recipe_ingredient_search():
     ingredient = request.json.get('ingredient')
+    cached_items = fetch_items(ingredient, ["publix", "food-city", "kroger", "sams-club", "food-lion", "aldi"][current_user.preferred_store])
+    if len(cached_items) == 0:
+        items = search_items(ingredient, current_user.preferred_store)
+    else:
+        items = cached_items
+    items = [list(i) for i in items]
+    return jsonify(items)
+
+@app.route('/recipe/update/', methods=['POST'])
+@login_required
+def recipe_ingredient_update():
+    ingredient = request.json.get('ingredient')
     items = search_items(ingredient, current_user.preferred_store)
     items = [list(i) for i in items]
     return jsonify(items)
@@ -272,5 +285,4 @@ def recipe_generate_steps():
                    new_step += split_step[i] + '. '
             steps.append(new_step[:-2])
     steps = list(filter(None, steps))
-    print(steps)
     return jsonify(steps)
