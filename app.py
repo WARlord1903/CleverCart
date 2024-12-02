@@ -136,7 +136,7 @@ def welcome_page():
 @login_required
 def search():
     
-    ingredient = request.form.get("ingredient-search")
+    ingredient = request.form.get("ingredient-search").lower()
     items = search_items(ingredient, current_user.preferred_store) if ingredient else []
     return render_template('home.html', search_term=ingredient, ingredient_list=items, username=get_username())
 
@@ -228,7 +228,7 @@ def recipe():
 @app.route('/recipe/search/', methods=['POST'])
 @login_required
 def recipe_ingredient_search():
-    ingredient = request.json.get('ingredient')
+    ingredient = request.json.get('ingredient').lower()
     cached_items = fetch_items(ingredient, ["publix", "food-city", "kroger", "sams-club", "food-lion", "aldi"][current_user.preferred_store])
     if len(cached_items) == 0:
         items = search_items(ingredient, current_user.preferred_store)
@@ -240,7 +240,7 @@ def recipe_ingredient_search():
 @app.route('/recipe/update/', methods=['POST'])
 @login_required
 def recipe_ingredient_update():
-    ingredient = request.json.get('ingredient')
+    ingredient = request.json.get('ingredient').lower()
     items = search_items(ingredient, current_user.preferred_store)
     items = [list(i) for i in items]
     return jsonify(items)
